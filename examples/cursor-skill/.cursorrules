@@ -1,0 +1,14 @@
+# github-helper
+
+Assist with GitHub issue triage
+
+## Commands
+- gh issue list --limit 10
+- gh pr list --state open
+
+## Tools
+- gh
+- jq
+
+## Examples
+- Use `gh issue list --label bug --limit 5` to focus on bugs.

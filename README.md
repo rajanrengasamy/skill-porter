@@ -1,79 +1,121 @@
 # skill-porter
 
-Convert agent skills between ecosystem formats (OpenClaw, Claude-style docs, HuggingFace-style skills, and others).
+Convert agent skills between **OpenClaw**, **Claude Code**, and **Cursor**.
 
-## Current status
+## What works in this MVP
 
-**Pre-MVP scaffold (not feature-complete yet).**
+- `skill-porter convert <source-path> <target-format>`
+- Auto-detect source format:
+  - OpenClaw `SKILL.md`
+  - Claude `AGENTS.md` / `CLAUDE.md`
+  - Cursor `.cursorrules`
+- Parse + map core fields:
+  - name
+  - description
+  - commands
+  - tools
+  - examples
+- Target output generation for:
+  - OpenClaw (`SKILL.md`)
+  - Claude (`AGENTS.md`)
+  - Cursor (`.cursorrules`)
+- `--dry-run` preview mode
+- `--output <dir>` output directory control
 
-This repository currently contains:
-- a product/implementation plan in `PRD.md`
-- a minimal TypeScript entrypoint in `src/index.ts`
-- concept artifacts (`concept_card.*`)
+## Install
 
-What is implemented right now:
-- `node src/index.ts` runs and prints a placeholder message
-
-What is **not** implemented yet:
-- skill format detection
-- parsing/conversion logic
-- validators
-- packaged CLI (`skill-porter convert ...`)
-
-If you are evaluating this project today, treat it as an early foundation with a clear build plan, not a finished tool.
-
-## Why this project exists
-
-Skill definitions are currently fragmented across tools and platforms. Moving a skill from one ecosystem to another is mostly manual and error-prone. `skill-porter` is intended to provide a single, reliable conversion workflow.
-
-## Quick start (works today)
-
-### Prerequisites
-- Node.js (tested with **v25.6.1**)
-
-### Run current scaffold
 ```bash
-git clone https://github.com/rajanrengasamy/skill-porter.git
-cd skill-porter
-node src/index.ts
+npm install
+npm run build
 ```
 
-Expected output:
-```text
-TODO: implement project logic
-```
+Run locally:
 
-Alternative runtime (also verified):
 ```bash
-npx --yes tsx src/index.ts
+node dist/index.js --help
 ```
 
-## Repository layout
+Or with tsx during development:
+
+```bash
+npx tsx src/index.ts --help
+```
+
+## CLI usage
+
+```bash
+skill-porter convert <source-path> <target-format> [--dry-run] [--output <dir>]
+```
+
+Target formats:
+
+- `openclaw`
+- `claude`
+- `cursor`
+
+## Real examples
+
+### 1) OpenClaw → Cursor
+
+```bash
+node dist/index.js convert ./examples/openclaw-skill/SKILL.md cursor --output ./examples/out
+```
+
+Expected console output:
 
 ```text
-skill-porter/
-├── src/
-│   └── index.ts          # current scaffold entrypoint
-├── PRD.md                # implementation plan and scope
-├── concept_card.md       # concept summary
-├── concept_card.html
-└── concept_card.png
+Detected source format: openclaw
+Target format: cursor
+✓ Converted skill written to .../examples/out/.cursorrules
 ```
 
-## Planned direction
+Example generated file (`.cursorrules`):
 
-Near-term implementation focus:
-1. Build a normalized internal skill model (AST-like structure)
-2. Implement first parser/converter path end-to-end (OpenClaw ↔ Claude-style format)
-3. Add validation + warnings for unsupported features
-4. Introduce a real CLI surface (`convert`, `--dry-run`, `--output`)
-5. Add tests and release packaging
+```md
+# github-helper
 
-## Contributing
+Assist with GitHub issue triage
 
-Contributions are welcome, especially around:
-- parser design
-- conversion edge cases
-- test fixtures for real-world skills
+## Rules
+- Follow project conventions
+- Keep responses actionable and concise
 
-Please open an issue first if you want to propose a major format mapping or CLI behavior change.
+## Commands
+- gh issue list --limit 10
+- gh pr list --state open
+
+## Tools
+- gh
+- jq
+```
+
+### 2) Cursor → Claude (dry run)
+
+```bash
+node dist/index.js convert ./examples/cursor-skill/.cursorrules claude --dry-run
+```
+
+This prints the converted `AGENTS.md` content to stdout without writing files.
+
+## Project scripts
+
+```bash
+npm run build   # compile TypeScript to dist/
+npm test        # basic parser + conversion tests
+npm run dev -- convert ./path/to/SKILL.md cursor
+```
+
+## Development notes
+
+- Runtime: Node.js
+- Language: TypeScript
+- Parsing libraries:
+  - `gray-matter` (frontmatter)
+  - `js-yaml` (YAML generation)
+- Conversion is fully local (no network calls)
+
+## Current limitations
+
+- This MVP focuses on OpenClaw, Claude, and Cursor only.
+- Additional targets (HuggingFace, Superpowers) are planned next.
+- Section mapping is best-effort when source files are loosely structured.
